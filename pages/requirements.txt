@@ -1,3 +1,5 @@
 streamlit
 plotly
+pandas
+
 #라이브러리
