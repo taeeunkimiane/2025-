@@ -3,5 +3,5 @@ pandas
 plotly
 folium
 streamlit-folium
-
+yfinace
 #라이브러리
