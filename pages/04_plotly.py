@@ -13,11 +13,11 @@ df_sum, df_gender = load_data()
 
 # 지역 리스트
 regions = df_sum['행정구역'].unique().tolist()
-st.title("📊 2025년 5월 인구 피라미드 시각화")
-selected_region = st.selectbox("📍 지역을 선택하세요", regions)
+st.title("\U0001F4CA 2025년 5월 인구 피라미드 시각화")
+selected_region = st.selectbox("\U0001F4CD 지역을 선택하세요", regions)
 
 # 연령대 필터
-age_min, age_max = st.slider("🎚️ 연령대 범위 선택", 0, 100, (0, 100))
+age_min, age_max = st.slider("\U0001F39A️ 연령대 범위 선택", 0, 100, (0, 100))
 
 # 선택한 지역 필터링
 df_region_gender = df_gender[df_gender['행정구역'] == selected_region]
@@ -42,8 +42,5 @@ df_plot = pd.DataFrame({
 
 # 인구 피라미드 시각화
 fig = px.bar(df_plot, x="인구수", y="연령", color="성별", orientation="h",
-             title=f"📍 {selected_region} 인구 피라미드", height=800)
+             title=f"\U0001F4CD {selected_region} 인구 피라미드", height=800)
 st.plotly_chart(fig, use_container_width=True)
-
-
-
