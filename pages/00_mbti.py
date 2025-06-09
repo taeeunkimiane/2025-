@@ -1,78 +1,26 @@
 import streamlit as st
-import numpy as np
-import matplotlib.pyplot as plt
+import folium
+from streamlit_folium import st_folium
 
-# 손실 함수 정의 (Rosenbrock function)
-def loss_function(x, y):
-    return (1 - x)**2 + 100 * (y - x**2)**2
+st.title("🗺️ 나만의 위치 북마크 지도")
 
-# 그래디언트 정의
-def grad(x, y):
-    dx = -2 * (1 - x) - 400 * x * (y - x**2)
-    dy = 200 * (y - x**2)
-    return dx, dy
+st.write("아래에 장소 정보를 입력하고 지도에 표시해보세요!")
 
-# 최적화 알고리즘 정의
-def optimize(algorithm, lr, steps, beta1=0.9, beta2=0.999, epsilon=1e-8):
-    x, y = -1.5, 1.5  # 시작점
-    path = [(x, y)]
-    vx, vy = 0, 0
-    sx, sy = 0, 0
+# 장소 입력
+place = st.text_input("장소 이름", value="서울 시청")
+lat = st.number_input("위도 (Latitude)", value=37.5665, format="%.6f")
+lon = st.number_input("경도 (Longitude)", value=126.9780, format="%.6f")
 
-    for t in range(1, steps + 1):
-        dx, dy = grad(x, y)
+# 세션 상태 저장
+if "places" not in st.session_state:
+    st.session_state.places = []
 
-        if algorithm == "SGD":
-            x -= lr * dx
-            y -= lr * dy
+if st.button("지도에 추가하기"):
+    st.session_state.places.append((place, lat, lon))
 
-        elif algorithm == "Momentum":
-            vx = beta1 * vx + (1 - beta1) * dx
-            vy = beta1 * vy + (1 - beta1) * dy
-            x -= lr * vx
-            y -= lr * vy
+# 지도 그리기
+m = folium.Map(location=[37.5665, 126.9780], zoom_start=6)
+for name, lat, lon in st.session_state.places:
+    folium.Marker([lat, lon], tooltip=name).add_to(m)
 
-        elif algorithm == "RMSProp":
-            sx = beta2 * sx + (1 - beta2) * dx**2
-            sy = beta2 * sy + (1 - beta2) * dy**2
-            x -= lr * dx / (np.sqrt(sx) + epsilon)
-            y -= lr * dy / (np.sqrt(sy) + epsilon)
-
-        elif algorithm == "Adam":
-            vx = beta1 * vx + (1 - beta1) * dx
-            vy = beta1 * vy + (1 - beta1) * dy
-            sx = beta2 * sx + (1 - beta2) * dx**2
-            sy = beta2 * sy + (1 - beta2) * dy**2
-
-            vx_hat = vx / (1 - beta1**t)
-            vy_hat = vy / (1 - beta1**t)
-            sx_hat = sx / (1 - beta2**t)
-            sy_hat = sy / (1 - beta2**t)
-
-            x -= lr * vx_hat / (np.sqrt(sx_hat) + epsilon)
-            y -= lr * vy_hat / (np.sqrt(sy_hat) + epsilon)
-
-        path.append((x, y))
-
-    return np.array(path)
-
-# Streamlit 인터페이스
-st.title("🧠 최적화 알고리즘 시각화")
-
-algo = st.radio("알고리즘 선택", ["SGD", "Momentum", "RMSProp", "Adam"])
-lr = st.slider("학습률 (learning rate)", 0.001, 0.2, 0.05)
-steps = st.slider("스텝 수", 10, 200, 50)
-
-path = optimize(algo, lr, steps)
-
-# 손실 함수 시각화
-x = np.linspace(-2, 2, 400)
-y = np.linspace(-1, 3, 400)
-X, Y = np.meshgrid(x, y)
-Z = loss_function(X, Y)
-
-fig, ax = plt.subplots()
-cp = ax.contour(X, Y, Z, levels=50)
-ax.plot(path[:, 0], path[:, 1], 'ro-', markersize=3, linewidth=1)
-ax.set_title(f"{algo} 최적화 경로")
-st.pyplot(fig)
+st_folium(m, width=700, height=500)
