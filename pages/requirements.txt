@@ -1,5 +1,7 @@
 streamlit
-plotly
 pandas
+plotly
+folium
+streamlit-folium
 
 #라이브러리
